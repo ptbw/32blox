@@ -25,18 +25,18 @@
 #include "32blit.hpp"
 #include "32blox.hpp"
 
-#include "32bee.h"
+//#include "32bee.h"
 
 
 /* Module variables. */
 
-static blit::rgba   m_text_colour;
+static blit::Pen    m_text_colour;
 static uint16_t     m_gradient_row;
 static uint32_t     m_score;
 static char         m_player[3];
 static uint8_t      m_cursor;
 static uint32_t     m_waiting;
-static blit::timer  m_wait_timer, m_flicker_timer;
+static blit::Timer  m_wait_timer, m_flicker_timer;
 
 
 /* Module functions. */
@@ -45,7 +45,7 @@ static blit::timer  m_wait_timer, m_flicker_timer;
  * _death_wait_timer_update - a callback simply to set the waiting flag to false
  */
 
-void _death_wait_timer_update( blit::timer &p_timer )
+void _death_wait_timer_update( blit::Timer &p_timer )
 {
     m_waiting = false;
     p_timer.stop();
@@ -56,7 +56,7 @@ void _death_wait_timer_update( blit::timer &p_timer )
  * _death_flicker_timer_update - callback for the font flicker and background
  */
 
-void _death_flicker_timer_update( blit::timer &p_timer )
+void _death_flicker_timer_update( blit::Timer &p_timer )
 {
   static uint16_t ls_loopcount = 0;
   
@@ -65,12 +65,12 @@ void _death_flicker_timer_update( blit::timer &p_timer )
   {
     ls_loopcount = 0;
   }
-  m_text_colour = blit::rgba( 
-                              ls_loopcount % 255, 
-                              ( ls_loopcount % 512 ) / 2, 
-                              255 - ( ls_loopcount % 255 ),
-                              255
-                            );
+  m_text_colour = blit::Pen( 
+                          ls_loopcount % 255, 
+                          ( ls_loopcount % 512 ) / 2, 
+                          255 - ( ls_loopcount % 255 ),
+                          255
+                        );
   m_gradient_row = ( ls_loopcount / 10 ) % 120;
 }
 
@@ -121,7 +121,7 @@ gamestate_t death_update( void )
   }
   
   /* Move the cursor left. */
-  if ( ( blit::pressed( blit::button::DPAD_LEFT ) ) || ( blit::joystick.x < -0.1f ) )
+  if ( ( blit::pressed( blit::Button::DPAD_LEFT ) ) || ( blit::joystick.x < -0.1f ) )
   {
     /* Remember that we're moving somewhere. */
     l_moving = true;
@@ -140,7 +140,7 @@ gamestate_t death_update( void )
   }
   
   /* Or right, come to that! */
-  if ( ( blit::pressed( blit::button::DPAD_RIGHT ) ) || ( blit::joystick.x > 0.1f ) )
+  if ( ( blit::pressed( blit::Button::DPAD_RIGHT ) ) || ( blit::joystick.x > 0.1f ) )
   {
     /* Remember that we're moving somewhere. */
     l_moving = true;
@@ -159,7 +159,7 @@ gamestate_t death_update( void )
   }
   
   /* Up means moving up through the alphabet. */
-  if ( ( blit::pressed( blit::button::DPAD_UP ) ) || ( blit::joystick.y < -0.1f ) )
+  if ( ( blit::pressed( blit::Button::DPAD_UP ) ) || ( blit::joystick.y < -0.1f ) )
   {
     /* Remember that we're moving somewhere. */
     l_moving = true;
@@ -178,7 +178,7 @@ gamestate_t death_update( void )
   }
   
   /* And down means, well, moving down through the alphabet. */
-  if ( ( blit::pressed( blit::button::DPAD_DOWN ) ) || ( blit::joystick.y > 0.1f ) )
+  if ( ( blit::pressed( blit::Button::DPAD_DOWN ) ) || ( blit::joystick.y > 0.1f ) )
   {
     /* Remember that we're moving somewhere. */
     l_moving = true;
@@ -203,7 +203,7 @@ gamestate_t death_update( void )
   }
   
   /* Check to see if the player has pressed the save button. */
-  if ( blit::pressed( blit::button::B ) )
+  if ( blit::pressed( blit::Button::B ) )
   {
     /* Save this, and take the user into the hi score table. */
     hiscore_save_score( m_score, m_player );
@@ -223,22 +223,29 @@ gamestate_t death_update( void )
 void death_render( void )
 {
   uint16_t    l_row;
-  bee_point_t l_point;
-  bee_font_t  l_outline_font, l_minimal_font;
+  //bee_point_t l_point;
+  //bee_font_t  l_outline_font, l_minimal_font;
+  blit::Point l_point;
+  
+  double w = 64.0;
+  double h = 48.0;
   
   /* Clear the screen to a nice shifting gradient. */
-  for( l_row = 0; l_row < blit::fb.bounds.h; l_row++ )
-  {
-    blit::fb.pen( 
-      blit::rgba( 
-        (int)( 64.0f + 48.0f * ( sin( M_PI * 2 / blit::fb.bounds.h * l_row  ) ) ), 
+  for( l_row = 0; l_row < blit::screen.bounds.h; l_row++ )
+  {        
+    double s = (3.14159 * 2 / blit::screen.bounds.h) * l_row;
+    double c = (3.14159 * 2 / blit::screen.bounds.h) * l_row;
+    blit::screen.pen = 
+      blit::Pen( 
+        (int)( w + ( h *  sin( s ) ) ), 
         0, 
-        (int)( 64.0f + 48.0f * ( cos( M_PI * 2 / blit::fb.bounds.h * l_row ) ) ), 
+        (int)( w + ( h *  cos( c ) ) ), 
         255 
-      )
-    );
-    blit::fb.line( point( 0, ( l_row + m_gradient_row ) % blit::fb.bounds.h ), 
-             point( blit::fb.bounds.w, ( l_row + m_gradient_row ) % blit::fb.bounds.h ) );
+      );
+
+   
+    blit::screen.line( blit::Point( 0, ( l_row + m_gradient_row ) % blit::screen.bounds.h ), 
+             blit::Point( blit::screen.bounds.w, ( l_row + m_gradient_row ) % blit::screen.bounds.h ) );
   }
   
   /* Frame everything with bricks; we're a brick game after all! */
@@ -259,49 +266,49 @@ void death_render( void )
   sprite_render( "brick_yellow", 144, 104 );
   
   /* Get hold of the fonts in our new renderer. */
-  memcpy( &l_outline_font, bee_text_create_fixed_font( outline_font ), sizeof( bee_font_t ) );
-  memcpy( &l_minimal_font, bee_text_create_fixed_font( minimal_font ), sizeof( bee_font_t ) );
+  //memcpy( &l_outline_font, bee_text_create_fixed_font( outline_font ), sizeof( bee_font_t ) );
+  //memcpy( &l_minimal_font, bee_text_create_fixed_font( minimal_font ), sizeof( bee_font_t ) );
   
   /* Put the headings in somewhere sensible. */
-  blit::fb.pen( rgba( 255, 255, 255, 255 ) );
-  bee_text_set_font( &l_outline_font );
-  l_point.x = blit::fb.bounds.w / 2;
+  blit::screen.pen = blit::Pen( 255, 255, 255, 255 );
+  //bee_text_set_font( &l_outline_font );
+  l_point.x = blit::screen.bounds.w / 2;
   l_point.y = 1;
-  bee_text( &l_point, BEE_ALIGN_CENTRE, "NEW HIGH SCORE!" );
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "NEW HIGH SCORE!" );
   l_point.y = 20;
-  bee_text( &l_point, BEE_ALIGN_CENTRE, "%05d", m_score );
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "%05d", m_score );
   l_point.y = 64;
-  bee_text( &l_point, BEE_ALIGN_CENTRE, "LEFT/RIGHT TO SELECT" );
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "LEFT/RIGHT TO SELECT" );
   l_point.y = 80;
-  bee_text( &l_point, BEE_ALIGN_CENTRE, "UP/DOWN TO CHANGE" );
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "UP/DOWN TO CHANGE" );
   
   /* Now show the initials, in a different font to be distinctive. */
-  bee_text_set_font( &l_minimal_font );
+  //bee_text_set_font( &l_minimal_font );
   l_point.y = 40;
-  l_point.x = ( blit::fb.bounds.w / 2 ) - 10;
-  bee_text( &l_point, BEE_ALIGN_CENTRE, "%c", m_player[0] );
-  l_point.x = ( blit::fb.bounds.w / 2 );
-  bee_text( &l_point, BEE_ALIGN_CENTRE, "%c", m_player[1] );
-  l_point.x = ( blit::fb.bounds.w / 2 ) + 10;
-  bee_text( &l_point, BEE_ALIGN_CENTRE, "%c", m_player[2] );
+  l_point.x = ( blit::screen.bounds.w / 2 ) - 10;
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "%c", m_player[0] );
+  l_point.x = ( blit::screen.bounds.w / 2 );
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "%c", m_player[1] );
+  l_point.x = ( blit::screen.bounds.w / 2 ) + 10;
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "%c", m_player[2] );
   
   /* Draw a cursor around the currently selected letter. */
-  blit::fb.pen( m_text_colour );
-  blit::fb.line( point( ( blit::fb.bounds.w / 2 ) - 14 + ( 10 * m_cursor ), 38 ), 
-                 point( ( blit::fb.bounds.w / 2 ) - 6 + ( 10 * m_cursor ), 38 ) );
-  blit::fb.line( point( ( blit::fb.bounds.w / 2 ) - 6 + ( 10 * m_cursor ), 38 ), 
-                 point( ( blit::fb.bounds.w / 2 ) - 6 + ( 10 * m_cursor ), 48 ) );
-  blit::fb.line( point( ( blit::fb.bounds.w / 2 ) - 6 + ( 10 * m_cursor ), 48 ), 
-                 point( ( blit::fb.bounds.w / 2 ) - 14 + ( 10 * m_cursor ), 48 ) );
-  blit::fb.line( point( ( blit::fb.bounds.w / 2 ) - 14 + ( 10 * m_cursor ), 48 ), 
-                 point( ( blit::fb.bounds.w / 2 ) - 14 + ( 10 * m_cursor ), 38 ) );
+  blit::screen.pen = m_text_colour;
+  blit::screen.line( blit::Point( ( blit::screen.bounds.w / 2 ) - 14 + ( 10 * m_cursor ), 38 ), 
+                 blit::Point( ( blit::screen.bounds.w / 2 ) - 6 + ( 10 * m_cursor ), 38 ) );
+  blit::screen.line( blit::Point( ( blit::screen.bounds.w / 2 ) - 6 + ( 10 * m_cursor ), 38 ), 
+                 blit::Point( ( blit::screen.bounds.w / 2 ) - 6 + ( 10 * m_cursor ), 48 ) );
+  blit::screen.line( blit::Point( ( blit::screen.bounds.w / 2 ) - 6 + ( 10 * m_cursor ), 48 ), 
+                 blit::Point( ( blit::screen.bounds.w / 2 ) - 14 + ( 10 * m_cursor ), 48 ) );
+  blit::screen.line( blit::Point( ( blit::screen.bounds.w / 2 ) - 14 + ( 10 * m_cursor ), 48 ), 
+                 blit::Point( ( blit::screen.bounds.w / 2 ) - 14 + ( 10 * m_cursor ), 38 ) );
   
   /* Lastly, the text inviting the user to press the start button. */
-  blit::fb.pen( m_text_colour );
-  bee_text_set_font( &l_outline_font );
-  l_point.x = blit::fb.bounds.w / 2;
+  blit::screen.pen = m_text_colour;
+  //bee_text_set_font( &l_outline_font );
+  l_point.x = blit::screen.bounds.w / 2;
   l_point.y = 100;
-  bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'B' TO SAVE" );
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'B' TO SAVE" );
 }
 
 

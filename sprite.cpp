@@ -48,7 +48,7 @@
  * Returns the adjusted x value
  */
 
-static int16_t m_align_x( int16_t p_x, const packed_image *p_sprite, spritealign_t p_align )
+static int16_t m_align_x( int16_t p_x, const blit::packed_image *p_sprite, spritealign_t p_align )
 {
   /* Only have options here where adjustments are needed. */
   switch( p_align )
@@ -82,7 +82,7 @@ static int16_t m_align_x( int16_t p_x, const packed_image *p_sprite, spritealign
  * Returns the adjusted y value
  */
 
-static int16_t m_align_y( int16_t p_y, const packed_image *p_sprite, spritealign_t p_align )
+static int16_t m_align_y( int16_t p_y, const blit::packed_image *p_sprite, spritealign_t p_align )
 {
   /* Only have options here where adjustments are needed. */
   switch( p_align )
@@ -123,7 +123,7 @@ using namespace blit;
 void sprite_render( const char *p_sprite, int16_t p_column, int16_t p_row, spritealign_t p_align )
 {
   uint8_t             l_index;
-  rgba                l_palette[256];
+  Pen                 l_palette[256];
   const packed_image *l_sprite;
   const uint8_t      *l_spritedata;
   uint8_t             l_bitdepth, l_bit, l_pixel;
@@ -152,11 +152,11 @@ void sprite_render( const char *p_sprite, int16_t p_column, int16_t p_row, sprit
   /* Step three, if we're centering we finally have the data to do so! */
   if ( p_row == -1 )
   {
-    p_row = ( fb.bounds.h - l_sprite->height ) / 2;
+    p_row = ( screen.bounds.h - l_sprite->height ) / 2;
   }
   if ( p_column == -1 )
   {
-    p_column = ( fb.bounds.w - l_sprite->width ) / 2;
+    p_column = ( screen.bounds.w - l_sprite->width ) / 2;
   }
   
   /* Step 3.5, apply any alignment requirements, as best we can. */
@@ -164,14 +164,14 @@ void sprite_render( const char *p_sprite, int16_t p_column, int16_t p_row, sprit
   p_row = m_align_y( p_row, l_sprite, p_align );
 
   if ( p_row < -1 ) p_row = 0;
-  if ( p_row > fb.bounds.h ) p_row = fb.bounds.h;
+  if ( p_row > screen.bounds.h ) p_row = screen.bounds.h;
   if ( p_column < -1 ) p_column = 0;
-  if ( p_column > fb.bounds.w ) p_column = fb.bounds.w;
+  if ( p_column > screen.bounds.w ) p_column = screen.bounds.w;
   
   /* Step four, extract the palette into a more useful form. */
   for( l_index = 0; l_index < l_sprite->palette_entry_count; l_index++ )
   {
-    l_palette[l_index] = rgba( l_spritedata[ 0 ], l_spritedata[ 1 ], 
+    l_palette[l_index] = Pen( l_spritedata[ 0 ], l_spritedata[ 1 ], 
                                l_spritedata[ 2 ], l_spritedata[ 3 ] );
     l_spritedata += 4;
   }
@@ -193,8 +193,8 @@ void sprite_render( const char *p_sprite, int16_t p_column, int16_t p_row, sprit
       if ( ++l_bit == l_bitdepth )
       {
         /* Set the pixel at the current point. */
-        fb.pen( l_palette[l_pixel] );
-        fb.pixel( point( p_column + l_column, p_row + l_row ) );
+        screen.pen = l_palette[l_pixel];
+        screen.pixel( Point( p_column + l_column, p_row + l_row ) );
 
         /* And move along to the next column. */
         if ( ++l_column >= l_sprite->width )
@@ -217,7 +217,7 @@ void sprite_render( const char *p_sprite, int16_t p_column, int16_t p_row, sprit
  * Returns the size of the sprite
  */
 
-size sprite_size( const char *p_sprite )
+Size sprite_size( const char *p_sprite )
 {
   uint8_t             l_index;
   const packed_image *l_sprite;
@@ -234,13 +234,13 @@ size sprite_size( const char *p_sprite )
   /* If we didn't find anything, we can't really proceed any further. */
   if ( m_sprites[l_index].data == NULL )
   {
-    return size( 0, 0 );
+    return Size( 0, 0 );
   }
 
   /* Step two, extract some basic metrics about the chosen sprite. */
   l_sprite = (const packed_image *)m_sprites[l_index].data;  
   
-  return size( l_sprite->width, l_sprite->height );
+  return Size( l_sprite->width, l_sprite->height );
 }
 
 
@@ -262,11 +262,11 @@ bool sprite_collide( const char *pa_sprite, int16_t pa_column, int16_t pa_row, s
                      const char *pb_sprite, int16_t pb_column, int16_t pb_row, spritealign_t pb_align )
 {
   uint8_t             l_index;
-  rgba                la_palette[256], lb_palette[256];
+  Pen                 la_palette[256], lb_palette[256];
   const packed_image *la_sprite = NULL, *lb_sprite = NULL;
   const uint8_t      *la_spritedata, *lb_spritedata;
   uint8_t             la_bitdepth, lb_bitdepth;
-  rect                la_bounds, lb_bounds;
+  Rect                la_bounds, lb_bounds;
   uint8_t             l_bit, l_pixel;
   uint16_t            l_row, l_column;
   

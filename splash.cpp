@@ -25,14 +25,14 @@
 #include "32blit.hpp"
 #include "32blox.hpp"
 
-#include "32bee.h"
+//#include "32bee.h"
 
 
 /* Module variables. */
 
-static rgba         m_text_colour;
+static blit::Pen    m_text_colour;
 static uint16_t     m_gradient_row;
-static blit::timer  m_flicker_timer;
+static blit::Timer  m_flicker_timer;
 
 
 /* Module functions. */
@@ -41,7 +41,7 @@ static blit::timer  m_flicker_timer;
  * _splash_flicker_timer_update - callback for the font flicker and background
  */
 
-void _splash_flicker_timer_update( blit::timer &p_timer )
+void _splash_flicker_timer_update( blit::Timer &p_timer )
 {
   static uint16_t ls_loopcount = 0;
   
@@ -50,12 +50,12 @@ void _splash_flicker_timer_update( blit::timer &p_timer )
   {
     ls_loopcount = 0;
   }
-  m_text_colour = blit::rgba( 
-                              ls_loopcount % 255, 
-                              ( ls_loopcount % 512 ) / 2, 
-                              255 - ( ls_loopcount % 255 ),
-                              255
-                            );
+  m_text_colour = blit::Pen( 
+                          ls_loopcount % 255, 
+                          ( ls_loopcount % 512 ) / 2, 
+                          255 - ( ls_loopcount % 255 ),
+                          255
+                        );
   m_gradient_row = ( ls_loopcount / 10 ) % 120;
 }
 
@@ -79,7 +79,7 @@ gamestate_t splash_update( void )
   }
  
   /* Check to see if the player has pressed the start button. */
-  if ( blit::pressed( blit::button::A ) )
+  if ( blit::pressed( blit::Button::A ) )
   {
     m_flicker_timer.stop();
     return STATE_GAME;
@@ -97,22 +97,27 @@ gamestate_t splash_update( void )
 void splash_render( void )
 {
   uint16_t    l_row;
-  bee_point_t l_point;
-  bee_font_t  l_outline_font;
+  //bee_point_t l_point;
+  //bee_font_t  l_outline_font;
+  blit::Point l_point;
+  double w = 64.0;
+  double h = 48.0;
   
   /* Clear the screen to a nice shifting gradient. */
-  for( l_row = 0; l_row < blit::fb.bounds.h; l_row++ )
+  for( l_row = 0; l_row < blit::screen.bounds.h; l_row++ )
   {
-    blit::fb.pen( 
-      blit::rgba( 
-        (int)( 64.0f + 48.0f * ( sin( M_PI * 2 / blit::fb.bounds.h * l_row  ) ) ), 
+    double s = (3.14159 * 2 / blit::screen.bounds.h) * l_row;
+    double c = (3.14159 * 2 / blit::screen.bounds.h) * l_row;
+    blit::screen.pen = 
+      blit::Pen( 
+        (int)( w + ( h *  sin( s ) ) ), 
         0, 
-        (int)( 64.0f + 48.0f * ( cos( M_PI * 2 / blit::fb.bounds.h * l_row ) ) ), 
+        (int)( w + ( h *  cos( c ) ) ), 
         255 
-      )
-    );
-    blit::fb.line( point( 0, ( l_row + m_gradient_row ) % blit::fb.bounds.h ), 
-             point( blit::fb.bounds.w, ( l_row + m_gradient_row ) % blit::fb.bounds.h ) );
+      );
+                  
+    blit::screen.line( blit::Point( 0, ( l_row + m_gradient_row ) % blit::screen.bounds.h ), 
+             blit::Point( blit::screen.bounds.w, ( l_row + m_gradient_row ) % blit::screen.bounds.h ) );
   }
   
   /* Frame everything with bricks; we're a brick game after all! */
@@ -136,14 +141,14 @@ void splash_render( void )
   sprite_render( "logo", -1, 15 );
   
   /* Get hold of the outline font in our new renderer. */
-  memcpy( &l_outline_font, bee_text_create_fixed_font( outline_font ), sizeof( bee_font_t ) );
-  bee_text_set_font( &l_outline_font );
+  //memcpy( &l_outline_font, bee_text_create_fixed_font( outline_font ), sizeof( bee_font_t ) );
+  //bee_text_set_font( &l_outline_font );
   
   /* Lastly, the text inviting the user to press the start button. */
-  blit::fb.pen( m_text_colour );
-  l_point.x = blit::fb.bounds.w / 2;
+  blit::screen.pen = m_text_colour;
+  l_point.x = blit::screen.bounds.w / 2;
   l_point.y = 100;
-  bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'A' TO START" );
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'A' TO START" );  
 }
 
 

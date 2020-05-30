@@ -78,7 +78,7 @@ static bool check_brick_hit( uint16_t p_row, uint16_t p_column, uint16_t p_newx,
 uint8_t ball_create( bat_t p_bat )
 {
   uint8_t l_index;
-  size    l_ballsize = sprite_size( "ball" );
+  blit::Size    l_ballsize = sprite_size( "ball" );
   
   /* Find an empty slot in the ball array. */
   for ( l_index = 0; l_index < MAX_BALLS; l_index++ )
@@ -124,12 +124,12 @@ uint8_t ball_spawn( uint8_t )
 
 int8_t ball_update( uint8_t p_ballid, bat_t p_bat )
 {
-  uint8_t  l_score = 0;
-  uint8_t  l_row, l_column;
-  uint16_t l_newx, l_newy;
-  float    l_edge, l_speed;
-  size     l_ballsize = sprite_size( "ball" );
-  bool     l_bounced;
+  uint8_t       l_score = 0;
+  uint8_t       l_row, l_column;
+  uint16_t      l_newx, l_newy;
+  float         l_edge, l_speed;
+  blit::Size    l_ballsize = sprite_size( "ball" );
+  bool          l_bounced;
   
   /* Only active, valid balls need apply. */
   if ( ( p_ballid < 0 ) || ( p_ballid >= MAX_BALLS ) || ( !m_balls[p_ballid].active ) )
@@ -154,14 +154,14 @@ int8_t ball_update( uint8_t p_ballid, bat_t p_bat )
     m_balls[p_ballid].dx *= -1.0f;
     l_score++;
   }
-  if ( ( l_newy <= 0 ) || ( l_newy >= blit::fb.bounds.w ) )
+  if ( ( l_newy <= 0 ) || ( l_newy >= blit::screen.bounds.w ) )
   {
     m_balls[p_ballid].dy *= -1.0f;
     l_score++;
   }
   
   /* If we've hit the bottom, though, we have bigger problems. */
-  if ( l_newx >= blit::fb.bounds.h )
+  if ( l_newx >= blit::screen.bounds.h )
   {
     m_balls[p_ballid].active = 0;
     return -1;

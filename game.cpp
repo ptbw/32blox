@@ -23,12 +23,12 @@
 #include "32blit.hpp"
 #include "32blox.hpp"
 
-#include "32bee.h"
+//#include "32bee.h"
 
 
 /* Module variables. */
 
-static rgba         m_text_colour;
+static blit::Pen    m_text_colour;
 static uint32_t     m_hiscore;
 static uint32_t     m_score;
 static uint8_t      m_lives;
@@ -37,7 +37,7 @@ static float        m_speed;
 static bool         m_flash;
 static int8_t       m_balls[MAX_BALLS];
 static bat_t        m_player;
-static blit::timer  m_flicker_timer, m_level_timer;
+static blit::Timer  m_flicker_timer, m_level_timer;
 static bool         m_waited;
 static struct { 
   const char *name; 
@@ -50,7 +50,7 @@ static struct {
  * _game_flicker_timer_update - callback for the font flicker and background
  */
 
-void _game_flicker_timer_update( blit::timer &p_timer )
+void _game_flicker_timer_update( blit::Timer &p_timer )
 {
   static uint16_t ls_loopcount = 0;
   
@@ -59,19 +59,19 @@ void _game_flicker_timer_update( blit::timer &p_timer )
   {
     ls_loopcount = 0;
   }
-  m_text_colour = blit::rgba( 
-                              ls_loopcount % 255, 
-                              ( ls_loopcount % 512 ) / 2, 
-                              255 - ( ls_loopcount % 255 ),
-                              255
-                            );
+  m_text_colour = blit::Pen( 
+                          ls_loopcount % 255, 
+                          ( ls_loopcount % 512 ) / 2, 
+                          255 - ( ls_loopcount % 255 ),
+                          255
+                        );
 }
 
 /*
  * _game_level_timer_update - pauses at the end of the level.
  */
 
-void _game_level_timer_update( blit::timer &p_timer )
+void _game_level_timer_update( blit::Timer &p_timer )
 {
   m_waited = true;
   p_timer.stop();
@@ -98,8 +98,8 @@ void game_init( void )
   m_flash = false;
   
   m_player.type = BAT_NORMAL;
-  m_player.position = blit::fb.bounds.w / 2;
-  m_player.baseline = blit::fb.bounds.h - 8;
+  m_player.position = blit::screen.bounds.w / 2;
+  m_player.baseline = blit::screen.bounds.h - 8;
   m_player.width = sprite_size( m_bats[BAT_NORMAL].name ).w;
   
   m_level_timer.init( _game_level_timer_update, 1500, 0 );
@@ -136,7 +136,7 @@ gamestate_t game_update( void )
   }
     
   /* See if the player is moving left. */
-  if ( ( blit::pressed( blit::button::DPAD_LEFT ) ) || ( blit::joystick.x < -0.1f ) )
+  if ( ( blit::pressed( blit::Button::DPAD_LEFT ) ) || ( blit::joystick.x < -0.1f ) )
   {
     /* Don't let them go outside of bounds. */
     if ( ( m_player.position -= m_speed ) < ( m_player.width / 2 ) )
@@ -146,17 +146,17 @@ gamestate_t game_update( void )
   }
   
   /* Or right, come to that! */
-  if ( ( blit::pressed( blit::button::DPAD_RIGHT ) ) || ( blit::joystick.x > 0.1f ) )
+  if ( ( blit::pressed( blit::Button::DPAD_RIGHT ) ) || ( blit::joystick.x > 0.1f ) )
   {
     /* Don't let them go outside of bounds. */
-    if ( ( m_player.position += m_speed ) > ( blit::fb.bounds.w - ( m_player.width / 2 ) ) )
+    if ( ( m_player.position += m_speed ) > ( blit::screen.bounds.w - ( m_player.width / 2 ) ) )
     {
       m_player.position -= m_speed;
     }
   }
   
   /* If they press the B button, launch any balls we're currently holding. */
-  if ( ( blit::pressed( blit::button::B ) ) && ( level_get_bricks() > 0 ) )
+  if ( ( blit::pressed( blit::Button::B ) ) && ( level_get_bricks() > 0 ) )
   {
     for ( l_index = 0; l_index < MAX_BALLS; l_index++ )
     {
@@ -233,7 +233,7 @@ gamestate_t game_update( void )
   
   /* Default to the status quo, then. */
   return STATE_GAME;
-}
+}  blit::Point l_point;
 
 
 /* 
@@ -245,47 +245,48 @@ void game_render( void )
   uint8_t       l_index, l_brick;
   float         l_red, l_green, l_blue;
   uint8_t      *l_line;
-  bee_point_t   l_point;
-  bee_font_t    l_outline_font, l_minimal_font;
+  //bee_point_t   l_point;
+  //bee_font_t    l_outline_font, l_minimal_font;
+  blit::Point l_point;
   
   /* Clear the screen back to something sensible. */
   if ( m_flash )
   {
-    blit::fb.pen( rgba( 240, 0, 0, 255 ) );
+    blit::screen.pen = blit::Pen( 240, 0, 0, 255 );
     m_flash = false;
   }
   else
   {
     /* Basically black. */
-    blit::fb.pen( rgba( 0, 0, 0, 255 ) );
-    blit::fb.clear();
+    blit::screen.pen = blit::Pen( 0, 0, 0, 255 );
+    blit::screen.clear();
     
     /* But let's put a nice dark gradient in there, based on level. */
     l_red = ( m_level * 5 ) % 64;
     l_green = ( 64 - ( m_level * 4 ) ) % 64;
     l_blue = 0;
-    for( l_index = 0; l_index < blit::fb.bounds.h - 16; l_index++ )
+    for( l_index = 0; l_index < blit::screen.bounds.h - 16; l_index++ )
     {
-      blit::fb.pen( rgba( l_red - ( l_red * l_index / ( blit::fb.bounds.h - 16.0 ) ), 
-                    l_green - ( l_green * l_index / ( blit::fb.bounds.h - 16.0 ) ), 
-                    l_blue - ( l_blue * l_index / ( blit::fb.bounds.h - 16.0 ) ), 
-                    255 ) );
-      blit::fb.line( point( 0, l_index ), point( blit::fb.bounds.w, l_index ) );
+      blit::screen.pen = blit::Pen( (int)(l_red - ( l_red * l_index / ( blit::screen.bounds.h - 16.0 ))), 
+                    (int)(l_green - ( l_green * l_index / ( blit::screen.bounds.h - 16.0 ))), 
+                    (int)(l_blue - ( l_blue * l_index / ( blit::screen.bounds.h - 16.0 ))), 
+                    255 );
+      blit::screen.line( blit::Point( 0, l_index ), blit::Point( blit::screen.bounds.w, l_index ) );
     }
   }
   
   /* Get hold of the fonts in our new renderer. */
-  memcpy( &l_outline_font, bee_text_create_fixed_font( outline_font ), sizeof( bee_font_t ) );
-  memcpy( &l_minimal_font, bee_text_create_fixed_font( minimal_font ), sizeof( bee_font_t ) );
+  //memcpy( &l_outline_font, bee_text_create_fixed_font( outline_font ), sizeof( bee_font_t ) );
+  //memcpy( &l_minimal_font, bee_text_create_fixed_font( minimal_font ), sizeof( bee_font_t ) );
   
   /* Render the top status line. */
 #pragma GCC diagnostic ignored "-Wformat"
-  blit::fb.pen( rgba( 255, 255, 255, 255 ) );
-  bee_text_set_font( &l_minimal_font );
+  blit::screen.pen = blit::Pen( 255, 255, 255, 255 );
+  //bee_text_set_font( &l_minimal_font );
   l_point.x = l_point.y = 1;
-  bee_text( &l_point, BEE_ALIGN_NONE, "HI:%05lu", m_hiscore );
-  l_point.x = blit::fb.bounds.w - 2;
-  bee_text( &l_point, BEE_ALIGN_RIGHT, "SC:%05lu", m_score );
+  //bee_text( &l_point, BEE_ALIGN_NONE, "HI:%05lu", m_hiscore );
+  l_point.x = blit::screen.bounds.w - 2;
+  //bee_text( &l_point, BEE_ALIGN_RIGHT, "SC:%05lu", m_score );
 #pragma GCC diagnostic pop
   
   /* Lives are tricky, we can run out of space... */
@@ -298,8 +299,8 @@ void game_render( void )
   }
   
   /* Underline that, to form a hard border to bounce off at the top. */
-  blit::fb.pen( rgba( 255, 255, 255, 255 ) );
-  blit::fb.line( point( 0, 9 ), point( blit::fb.bounds.w, 9 ) );
+  blit::screen.pen = blit::Pen( 255, 255, 255, 255 );
+  blit::screen.line( blit::Point( 0, 9 ), blit::Point( blit::screen.bounds.w, 9 ) );
   
   /* Now we draw up the surviving bricks in the level. */
   for ( l_index = 0; l_index < 10; l_index++ )
@@ -331,13 +332,13 @@ void game_render( void )
       ball_render( m_balls[l_index] );
       if ( ( ball_stuck( m_balls[l_index] ) ) && ( level_get_bricks() > 0 ) )
       {
-        blit::fb.pen( m_text_colour );
-        bee_text_set_font( &l_outline_font );
-        l_point.x = blit::fb.bounds.w / 2;
+        blit::screen.pen =  m_text_colour;
+        //bee_text_set_font( &l_outline_font );
+        l_point.x = blit::screen.bounds.w / 2;
         l_point.y = 82;
-        bee_text( &l_point, BEE_ALIGN_CENTRE, "LEVEL %02d", m_level );
+        //bee_text( &l_point, BEE_ALIGN_CENTRE, "LEVEL %02d", m_level );
         l_point.y = 90;
-        bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'B' TO LAUNCH" );
+        //bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'B' TO LAUNCH" );
       }
     }
   }
@@ -347,13 +348,13 @@ void game_render( void )
   /* And if the level is completed, let them know! */
   if ( level_get_bricks() == 0 )
   {
-    blit::fb.pen( m_text_colour );
-    bee_text_set_font( &l_outline_font );
-    l_point.x = blit::fb.bounds.w / 2;
+    blit::screen.pen = m_text_colour;
+    //bee_text_set_font( &l_outline_font );
+    l_point.x = blit::screen.bounds.w / 2;
     l_point.y = 46;
-    bee_text( &l_point, BEE_ALIGN_CENTRE, "LEVEL %02d CLEARED", m_level );
+    //bee_text( &l_point, BEE_ALIGN_CENTRE, "LEVEL %02d CLEARED", m_level );
     l_point.y = 60;
-    bee_text( &l_point, BEE_ALIGN_CENTRE, "GET READY!" );
+    //bee_text( &l_point, BEE_ALIGN_CENTRE, "GET READY!" );
   }
 }
 

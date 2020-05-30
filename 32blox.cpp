@@ -38,16 +38,16 @@ void init( void )
 {
 
   /* Set the screen into lores (160x120) mode. */
-  blit::set_screen_mode( screen_mode::lores );
+  blit::set_screen_mode( blit::ScreenMode::lores );
 
   /* And blank the screen. */
-  blit::fb.pen( rgba( 100, 0, 0, 255 ) );
-  blit::fb.clear();
+  blit::screen.pen = blit::Pen( 100, 0, 0, 255 );
+  blit::screen.clear();
   
   /* Set the initial gamestate (which should be redundant, but...) */
   m_gamestate = STATE_SPLASH;
   
-  /* Initialise the high score storage. */
+  /* Initialise the high scorefb storage. */
   hiscore_init();
 }
 

@@ -99,7 +99,7 @@ void        splash_render( void );
 gamestate_t splash_update( void );
 
 void        sprite_render( const char *, int16_t, int16_t, spritealign_t = ALIGN_TOPLEFT );
-size        sprite_size( const char * );
+blit::Size  sprite_size( const char * );
 bool        sprite_collide( const char *, int16_t, int16_t, spritealign_t, const char *, int16_t, int16_t, spritealign_t );
 
 
