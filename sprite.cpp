@@ -32,8 +32,17 @@
 /* Module variables. */
 
 /* Raw sprite data. */
+#include "build/assets.hpp"
 
-#include "assets.h"
+static const struct { const char *name; const uint8_t *data; const uint32_t length; } m_sprites[] = {
+{ "ball", m_sprite_ball, m_sprite_ball_length },
+{ "bat_normal", m_sprite_bat_normal, m_sprite_bat_normal_length },
+{ "brick_orange", m_sprite_brick_orange, m_sprite_brick_orange_length },
+{ "brick_red", m_sprite_brick_red, m_sprite_brick_red_length },
+{ "brick_yellow", m_sprite_brick_yellow, m_sprite_brick_yellow_length },
+{ "logo", m_sprite_logo, m_sprite_logo_length },
+{ "splash", m_sprite_splash, m_sprite_splash_length },
+{ NULL, NULL }};
 
 
 /* Module functions. */
@@ -72,7 +81,7 @@ static int16_t m_align_x( int16_t p_x, const blit::packed_image *p_sprite, sprit
 }
 
 
-/*
+/*s://user-images.githubusercontent.com/590409/83360818-04cc6e00-a37c-11ea-916f-5793b0b9
  * m_align_y - applies the alignment adjustment in the Y axis
  * 
  * int16_t, the initial y position
@@ -128,7 +137,7 @@ void sprite_render( const char *p_sprite, int16_t p_column, int16_t p_row, sprit
   const uint8_t      *l_spritedata;
   uint8_t             l_bitdepth, l_bit, l_pixel;
   uint16_t            l_row, l_column;
-  
+   
   /* Step one, find the sprite in the lookup table. */
   for( l_index = 0; m_sprites[l_index].name != NULL; l_index++ )
   {
@@ -141,13 +150,17 @@ void sprite_render( const char *p_sprite, int16_t p_column, int16_t p_row, sprit
   /* If we didn't find anything, we can't really proceed any further. */
   if ( m_sprites[l_index].data == NULL )
   {
+    printf("Sprite %s not found\n",p_sprite);
     return;
   }
-
+    
   /* Step two, extract some basic metrics about the chosen sprite. */
   l_sprite = (const packed_image *)m_sprites[l_index].data;
   l_spritedata = m_sprites[l_index].data + sizeof(packed_image);
   l_bitdepth = ceil( log(l_sprite->palette_entry_count) / log(2) );
+  
+  uint32_t len = m_sprites[l_index].length;
+  printf("Sprite %s (size 0x%X) (count 0x%X)\n",p_sprite, len, l_sprite->byte_count);
   
   /* Step three, if we're centering we finally have the data to do so! */
   if ( p_row == -1 )
@@ -159,6 +172,8 @@ void sprite_render( const char *p_sprite, int16_t p_column, int16_t p_row, sprit
     p_column = ( screen.bounds.w - l_sprite->width ) / 2;
   }
   
+  //printf("Sprite hight %d, width %d\n",l_sprite->height, l_sprite->width);
+  
   /* Step 3.5, apply any alignment requirements, as best we can. */
   p_column = m_align_x( p_column, l_sprite, p_align );
   p_row = m_align_y( p_row, l_sprite, p_align );
@@ -168,6 +183,8 @@ void sprite_render( const char *p_sprite, int16_t p_column, int16_t p_row, sprit
   if ( p_column < -1 ) p_column = 0;
   if ( p_column > screen.bounds.w ) p_column = screen.bounds.w;
   
+  //printf("Sprite row %d, column %d\n",p_row, p_column);
+  
   /* Step four, extract the palette into a more useful form. */
   for( l_index = 0; l_index < l_sprite->palette_entry_count; l_index++ )
   {
@@ -176,9 +193,10 @@ void sprite_render( const char *p_sprite, int16_t p_column, int16_t p_row, sprit
     l_spritedata += 4;
   }
   
+  
   /* And lastly, step five - extract the packed data, and spit it out. */
   l_row = l_column = l_bit = l_pixel = 0;
-  for ( ; l_spritedata < (const uint8_t *)l_sprite + l_sprite->byte_count; l_spritedata++ )
+  for ( ; l_spritedata < (const uint8_t *)l_sprite + len; l_spritedata++ ) // was l_sprite->byte_count
   {
     /* Extract each bit from each byte, up to the required bitdepth. */
     for ( l_index = 0; l_index < 8; l_index++ )

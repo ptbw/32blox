@@ -284,9 +284,14 @@ void game_render( void )
   blit::screen.pen = blit::Pen( 255, 255, 255, 255 );
   //bee_text_set_font( &l_minimal_font );
   l_point.x = l_point.y = 1;
-  //bee_text( &l_point, BEE_ALIGN_NONE, "HI:%05lu", m_hiscore );
-  l_point.x = blit::screen.bounds.w - 2;
+  //bee_text( &l_point, BEE_ALIGN_NONE, "HI:%05lu", m_hiscore ); 
+  char line[20];
+  sprintf(line,"HI:%05lu", m_hiscore);
+  blit::screen.text(line, blit::minimal_font, l_point); 
+  l_point.x = (blit::screen.bounds.w - 2) - 40;
   //bee_text( &l_point, BEE_ALIGN_RIGHT, "SC:%05lu", m_score );
+  sprintf(line,"SC:%05lu", m_score);
+  blit::screen.text(line, blit::minimal_font, l_point); 
 #pragma GCC diagnostic pop
   
   /* Lives are tricky, we can run out of space... */
@@ -334,11 +339,16 @@ void game_render( void )
       {
         blit::screen.pen =  m_text_colour;
         //bee_text_set_font( &l_outline_font );
-        l_point.x = blit::screen.bounds.w / 2;
+        l_point.x = (blit::screen.bounds.w / 2) - 20;
         l_point.y = 82;
         //bee_text( &l_point, BEE_ALIGN_CENTRE, "LEVEL %02d", m_level );
+        char line[20];
+        sprintf(line,"LEVEL %02d", m_level);
+        blit::screen.text(line, blit::outline_font, l_point); 
+        l_point.x = (blit::screen.bounds.w / 2) - 50;
         l_point.y = 90;
         //bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'B' TO LAUNCH" );
+        blit::screen.text("PRESS 'B' TO LAUNCH", blit::outline_font, l_point); 
       }
     }
   }
@@ -350,11 +360,16 @@ void game_render( void )
   {
     blit::screen.pen = m_text_colour;
     //bee_text_set_font( &l_outline_font );
-    l_point.x = blit::screen.bounds.w / 2;
+    l_point.x = (blit::screen.bounds.w / 2) - 30;
     l_point.y = 46;
     //bee_text( &l_point, BEE_ALIGN_CENTRE, "LEVEL %02d CLEARED", m_level );
+    char line[20];
+    sprintf(line,"LEVEL %02d  CLEARED", m_level);
+    blit::screen.text(line, blit::outline_font, l_point); 
+    l_point.x = (blit::screen.bounds.w / 2) - 40;
     l_point.y = 60;
     //bee_text( &l_point, BEE_ALIGN_CENTRE, "GET READY!" );
+    blit::screen.text("GET READY!", blit::outline_font, l_point); 
   }
 }
 

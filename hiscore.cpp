@@ -215,9 +215,10 @@ void hiscore_render( void )
   
   /* Title the screen, although it's probably pretty obvious... */
   blit::screen.pen = blit::Pen( 255, 255, 255, 255 );
-  l_point.x = blit::screen.bounds.w / 2;
+  l_point.x = (blit::screen.bounds.w / 2) - 40;
   l_point.y = 1;
   //bee_text( &l_point, BEE_ALIGN_CENTRE, "HIGH SCORES" );
+  blit::screen.text("HIGH SCORES", blit::outline_font, l_point); 
   
   /* Now just render the list, with a nice colour gradient. */
   for ( l_index = 0; l_index < MAX_SCORES; l_index++ )
@@ -233,12 +234,17 @@ void hiscore_render( void )
     l_point.y = 14 + ( 8 * l_index );
     //bee_text( &l_point, BEE_ALIGN_CENTRE, "%05d %c %c %c",  m_scores[l_index].score,
     //         m_scores[l_index].name[0], m_scores[l_index].name[1], m_scores[l_index].name[2] );
+    char scoreline[20];
+    sprintf(scoreline,"%05d %c %c %c",  m_scores[l_index].score, m_scores[l_index].name[0], m_scores[l_index].name[1], m_scores[l_index].name[2] );
+    blit::screen.text(scoreline, blit::outline_font, l_point);
   }
   
   /* Lastly, the text inviting the user to press the start button. */
   blit::screen.pen = m_text_colour;
+  l_point.x = (blit::screen.bounds.w / 2) - 50;
   l_point.y = 100;
   //bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'A' TO START" );  
+  blit::screen.text("PRESS 'A' TO START", blit::outline_font, l_point); 
 }
 
 

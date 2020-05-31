@@ -1,0 +1,23 @@
+assets.hpp:
+    assets/bat-normal.png:
+        name: m_sprite_bat_normal
+        transparent: 0,0,0
+    assets/ball.png:
+        name: m_sprite_ball
+        transparent: 0,0,0
+    assets/brick-orange.png:
+        name: m_sprite_brick_orange
+        transparent: 0,0,0
+    assets/brick-yellow.png:
+        name: m_sprite_brick_yellow
+        transparent: 0,0,0
+    assets/brick-red.png:
+        name: m_sprite_brick_red
+        transparent: 0,0,0
+    assets/logo.png:
+        name: m_sprite_logo
+        transparent: 0,0,0
+    assets/splash.png:
+        name: m_sprite_splash
+        transparent: 0,0,0
+

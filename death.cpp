@@ -272,25 +272,40 @@ void death_render( void )
   /* Put the headings in somewhere sensible. */
   blit::screen.pen = blit::Pen( 255, 255, 255, 255 );
   //bee_text_set_font( &l_outline_font );
-  l_point.x = blit::screen.bounds.w / 2;
-  l_point.y = 1;
+  l_point.x = (blit::screen.bounds.w / 2) - 40;
+  l_point.y = 1;  
   //bee_text( &l_point, BEE_ALIGN_CENTRE, "NEW HIGH SCORE!" );
+  blit::screen.text("NEW HIGH SCORE!", blit::outline_font, l_point); 
+  l_point.x = (blit::screen.bounds.w / 2) - 20;
   l_point.y = 20;
   //bee_text( &l_point, BEE_ALIGN_CENTRE, "%05d", m_score );
+  char line[20];
+  sprintf(line, "%05d", m_score);
+  blit::screen.text(line, blit::outline_font, l_point); 
+  l_point.x = (blit::screen.bounds.w / 2) - 60;
   l_point.y = 64;
   //bee_text( &l_point, BEE_ALIGN_CENTRE, "LEFT/RIGHT TO SELECT" );
+  blit::screen.text("LEFT/RIGHT TO SELECT", blit::outline_font, l_point); 
+  l_point.x = (blit::screen.bounds.w / 2) - 50;
   l_point.y = 80;
   //bee_text( &l_point, BEE_ALIGN_CENTRE, "UP/DOWN TO CHANGE" );
+  blit::screen.text("UP/DOWN TO CHANGE", blit::outline_font, l_point); 
   
   /* Now show the initials, in a different font to be distinctive. */
   //bee_text_set_font( &l_minimal_font );
   l_point.y = 40;
-  l_point.x = ( blit::screen.bounds.w / 2 ) - 10;
-  //bee_text( &l_point, BEE_ALIGN_CENTRE, "%c", m_player[0] );
-  l_point.x = ( blit::screen.bounds.w / 2 );
+  l_point.x = ( blit::screen.bounds.w / 2 ) - 12;
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "%c", m_player[0] );  
+  sprintf(line, "%c", m_player[0]);
+  blit::screen.text(line, blit::minimal_font, l_point); 
+  l_point.x = ( blit::screen.bounds.w / 2 ) - 2;
   //bee_text( &l_point, BEE_ALIGN_CENTRE, "%c", m_player[1] );
-  l_point.x = ( blit::screen.bounds.w / 2 ) + 10;
+  sprintf(line, "%c", m_player[1]);
+  blit::screen.text(line, blit::minimal_font, l_point); 
+  l_point.x = ( blit::screen.bounds.w / 2 ) + 8;
   //bee_text( &l_point, BEE_ALIGN_CENTRE, "%c", m_player[2] );
+  sprintf(line, "%c", m_player[2]);
+  blit::screen.text(line, blit::minimal_font, l_point); 
   
   /* Draw a cursor around the currently selected letter. */
   blit::screen.pen = m_text_colour;
@@ -306,9 +321,10 @@ void death_render( void )
   /* Lastly, the text inviting the user to press the start button. */
   blit::screen.pen = m_text_colour;
   //bee_text_set_font( &l_outline_font );
-  l_point.x = blit::screen.bounds.w / 2;
+  l_point.x = (blit::screen.bounds.w / 2) - 50;
   l_point.y = 100;
   //bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'B' TO SAVE" );
+  blit::screen.text("PRESS 'B' TO SAVE", blit::outline_font, l_point); 
 }
 
 

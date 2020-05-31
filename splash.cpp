@@ -139,6 +139,7 @@ void splash_render( void )
   
   /* Drop in the main logo nice and central(ish). */
   sprite_render( "logo", -1, 15 );
+
   
   /* Get hold of the outline font in our new renderer. */
   //memcpy( &l_outline_font, bee_text_create_fixed_font( outline_font ), sizeof( bee_font_t ) );
@@ -146,9 +147,10 @@ void splash_render( void )
   
   /* Lastly, the text inviting the user to press the start button. */
   blit::screen.pen = m_text_colour;
-  l_point.x = blit::screen.bounds.w / 2;
+  l_point.x = (blit::screen.bounds.w / 2) - 50;
   l_point.y = 100;
-  //bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'A' TO START" );  
+  //bee_text( &l_point, BEE_ALIGN_CENTRE, "PRESS 'A' TO START" ); 
+  blit::screen.text("PRESS 'A' TO START", blit::outline_font, l_point); 
 }
 
 
