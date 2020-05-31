@@ -1,3 +1,9 @@
+-------- Changes this fork ------
+Got sprites working with assets.yml file, although output hpp requires inline changing to static when building for 32Blit hardware? Sprite rendering is still via code rather than the engine.
+
+32Blit text added to replace 32bee calls, but could do with moving to a text class that handles aligning (centre, left, right etc)
+
+-------- original read me --------
 32Blox
 ======
 
@@ -31,3 +37,5 @@ way.
 
 Long term, it would be nice to pull together some C bindings into the Engine,
 so that we can have pure C projects.
+
+
