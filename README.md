@@ -4,7 +4,7 @@ Got sprites working with assets.yml file, although output hpp requires inline ch
 
 32Blit text added to replace 32bee calls, but could do with moving to a text class that handles aligning (centre, left, right etc)
 
--------- original read me --------
+-------- Original read me --------
 
 32Blox
 ======
